@@ -1,12 +1,13 @@
 import { Answer } from "./interfaces/answer";
 import { Question, QuestionType } from "./interfaces/question";
+import { makeBlankQuestion } from "./objects";
 
 /**
  * Consumes an array of questions and returns a new array with only the questions
  * that are `published`.
  */
 export function getPublishedQuestions(questions: Question[]): Question[] {
-    return [];
+    return questions.filter((quest: Question): boolean => quest.published);
 }
 
 /**
@@ -15,7 +16,12 @@ export function getPublishedQuestions(questions: Question[]): Question[] {
  * `expected`, and an empty array for its `options`.
  */
 export function getNonEmptyQuestions(questions: Question[]): Question[] {
-    return [];
+    return questions.filter(
+        (quest: Question): boolean =>
+            quest.body.length != 0 ||
+            quest.expected.length != 0 ||
+            quest.options.length != 0,
+    );
 }
 
 /***
@@ -24,9 +30,11 @@ export function getNonEmptyQuestions(questions: Question[]): Question[] {
  */
 export function findQuestion(
     questions: Question[],
-    id: number
+    id: number,
 ): Question | null {
-    return null;
+    let toReturn = questions.find((quest: Question): boolean => quest.id == id);
+    if (toReturn == undefined) return null;
+    return toReturn;
 }
 
 /**
@@ -35,7 +43,7 @@ export function findQuestion(
  * Hint: use filter
  */
 export function removeQuestion(questions: Question[], id: number): Question[] {
-    return [];
+    return questions.filter((quest: Question): boolean => quest.id != id);
 }
 
 /***
@@ -44,7 +52,7 @@ export function removeQuestion(questions: Question[], id: number): Question[] {
  * Do not modify the input array.
  */
 export function getNames(questions: Question[]): string[] {
-    return [];
+    return questions.map((quest: Question): string => quest.name);
 }
 
 /**
@@ -53,7 +61,14 @@ export function getNames(questions: Question[]): string[] {
  * making the `text` an empty string, and using false for both `submitted` and `correct`.
  */
 export function makeAnswers(questions: Question[]): Answer[] {
-    return [];
+    return questions.map(
+        (quest: Question): Answer => ({
+            questionId: quest.id,
+            text: "",
+            submitted: false,
+            correct: false,
+        }),
+    );
 }
 
 /***
@@ -62,7 +77,9 @@ export function makeAnswers(questions: Question[]): Answer[] {
  * Hint: as usual, do not modify the input questions array
  */
 export function publishAll(questions: Question[]): Question[] {
-    return [];
+    return questions.map(
+        (quest: Question): Question => ({ ...quest, published: true }),
+    );
 }
 
 /***
@@ -75,24 +92,38 @@ export function addNewQuestion(
     questions: Question[],
     id: number,
     name: string,
-    type: QuestionType
+    type: QuestionType,
 ): Question[] {
-    return [];
+    return questions.concat(makeBlankQuestion(id, name, type));
 }
 
 /***
  * Consumes an array of Questions and produces a new array of Questions, where all
  * the Questions are the same EXCEPT for the one with the given `targetId`. That
  * Question should be the same EXCEPT that its name should now be `newName`.
- * Hint: as usual, do not modify the input questions array, 
+ * Hint: as usual, do not modify the input questions array,
  *       to make a new copy of a question with some changes, use the ... operator
  */
 export function renameQuestionById(
     questions: Question[],
     targetId: number,
-    newName: string
+    newName: string,
 ): Question[] {
-    return [];
+    return questions.map(
+        (quest: Question): Question =>
+            quest.id == targetId ? { ...quest, name: newName } : quest,
+    );
+}
+
+export function replaceAt(
+    originalArray: string[],
+    index: number,
+    newValue: string,
+): string[] {
+    if (index == -1) return originalArray.concat(newValue);
+    let toReturn = [...originalArray];
+    toReturn[index] = newValue;
+    return toReturn;
 }
 
 /**
@@ -104,14 +135,26 @@ export function renameQuestionById(
  *
  * Remember, if a function starts getting too complicated, think about how a helper function
  * can make it simpler! Break down complicated tasks into little pieces.
- * 
+ *
  * Hint: you need to use the ... operator for both the question and the options array
  */
 export function editOption(
     questions: Question[],
     targetId: number,
     targetOptionIndex: number,
-    newOption: string
+    newOption: string,
 ): Question[] {
-    return [];
+    return questions.map(
+        (quest: Question): Question =>
+            quest.id == targetId ?
+                {
+                    ...quest,
+                    options: replaceAt(
+                        quest.options,
+                        targetOptionIndex,
+                        newOption,
+                    ),
+                }
+            :   quest,
+    );
 }
